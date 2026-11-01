@@ -2,6 +2,8 @@
 
 A modern, responsive global recipe discovery platform and kitchen companion featuring 110+ authentic recipes from 25 culinary traditions around the world, integrated with TheMealDB API, interactive cooking tools, and local recipe management.
 
+🌐 **Live Demo**: [https://recipebox-gray.vercel.app](https://recipebox-gray.vercel.app)
+
 ![Recipe Box Preview](https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=1200&q=80)
 
 ## ✨ Features
