@@ -18,8 +18,9 @@ interface MealDbResponse {
 }
 
 // Maps TheMealDB category to our 4 core categories
-function mapToCategory(mealDbCategory: string, area: string = ''): MealCategory {
+function mapToCategory(mealDbCategory?: string | null, area?: string | null): MealCategory {
   const cat = (mealDbCategory || '').toLowerCase();
+  const safeArea = (area || '').toLowerCase();
   if (cat.includes('breakfast')) return 'Breakfast';
   if (cat.includes('dessert') || cat.includes('starter') || cat.includes('side') || cat.includes('snack')) {
     return 'Snacks';
@@ -28,7 +29,7 @@ function mapToCategory(mealDbCategory: string, area: string = ''): MealCategory 
     return 'Supper';
   }
   if (cat.includes('chicken') || cat.includes('pasta') || cat.includes('seafood') || cat.includes('vegetarian') || cat.includes('vegan')) {
-    return (cat.includes('vegetarian') || cat.includes('vegan') || area.includes('American')) ? 'Lunch' : 'Supper';
+    return (cat.includes('vegetarian') || cat.includes('vegan') || safeArea.includes('american')) ? 'Lunch' : 'Supper';
   }
   return 'Supper';
 }
@@ -91,8 +92,8 @@ function extractIngredients(meal: MealDbMeal): Ingredient[] {
   return ingredients;
 }
 
-function inferDietary(ingredients: Ingredient[], category: string): string[] {
-  const text = (ingredients.map(i => i.name).join(' ') + ' ' + category).toLowerCase();
+function inferDietary(ingredients: Ingredient[], category?: string | null): string[] {
+  const text = (ingredients.map(i => i.name || '').join(' ') + ' ' + (category || '')).toLowerCase();
   const dietary: string[] = [];
 
   const meatTerms = ['chicken', 'beef', 'pork', 'lamb', 'mutton', 'duck', 'turkey', 'bacon', 'sausage', 'veal', 'meat'];
@@ -128,28 +129,29 @@ export function transformMealDbRecipe(meal: MealDbMeal): Recipe {
   const { prepTime, cookTime } = estimateTimes(instructions.length, ingredients.length);
   const difficulty = estimateDifficulty(ingredients.length, instructions.length);
   const category = mapToCategory(meal.strCategory, meal.strArea);
-  const dietary = inferDietary(ingredients, meal.strCategory || '');
+  const dietary = inferDietary(ingredients, meal.strCategory);
 
-  const tags = meal.strTags
+  const fallbackTags = [meal.strCategory, meal.strArea].filter((t): t is string => typeof t === 'string' && t.trim().length > 0);
+  const tags = typeof meal.strTags === 'string' && meal.strTags.trim().length > 0
     ? meal.strTags.split(',').map(t => t.trim()).filter(Boolean)
-    : [meal.strCategory, meal.strArea].filter(Boolean);
+    : fallbackTags;
 
-  const country = meal.strArea || 'International';
-  const cuisine = meal.strArea || 'International';
+  const country = (meal.strArea && meal.strArea.trim()) || 'International';
+  const cuisine = (meal.strArea && meal.strArea.trim()) || 'International';
 
   return {
-    id: `mealdb-${meal.idMeal}`,
-    title: meal.strMeal,
+    id: `mealdb-${meal.idMeal || Date.now()}`,
+    title: meal.strMeal || 'International Dish',
     country,
     cuisine,
-    region: meal.strArea,
+    region: meal.strArea || 'Global',
     category,
     mealType: meal.strCategory || 'Main Dish',
     difficulty,
     prepTime,
     cookTime,
     servings: 4,
-    image: meal.strMealThumb,
+    image: meal.strMealThumb || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=1000&q=80',
     ingredients,
     instructions,
     source: 'themealdb',
