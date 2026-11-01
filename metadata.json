@@ -1,0 +1,6 @@
+{
+  "name": "Recipe Box",
+  "description": "Discover your next favourite meal with curated recipes, TheMealDB exploration, step-by-step cooking guides, and personal recipe management.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
